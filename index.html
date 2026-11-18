@@ -48,28 +48,41 @@
         border:0; background:transparent; color:var(--ink-soft); padding:6px 14px; font-size:.9rem; font-weight:600; min-height:2.25rem;
       }
       .seg button[aria-pressed="true"]{ background:var(--ink); color:var(--bg); }
-      .root-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
-      @media (min-width:640px){ .root-grid{ grid-template-columns:repeat(12,1fr); } }
-      .root-btn{
-        border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
-        border-radius:10px; font-size:1.02rem; font-weight:700; padding:8px 2px;
+      /* ---------- Chord wheel (root + shape in one circle) ---------- */
+      .wheel-card{ padding:18px 16px 20px; }
+      .wheel-head{ align-items:flex-start; }
+      .wheel-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+      .wheel-sub{ margin:2px 0 4px; color:var(--ink-soft); font-size:.95rem; max-width:62ch; }
+      .wheel-sub strong{ color:var(--ink); }
+      .wheel-wrap{ position:relative; width:100%; max-width:540px; margin:10px auto 2px; aspect-ratio:1/1; }
+      .wheel-wrap svg{ width:100%; height:auto; display:block; overflow:visible; }
+      .wedge{ cursor:pointer; outline:none; }
+      .wedge path{ stroke:var(--panel); stroke-width:3; transition:filter .15s ease, opacity .15s ease; }
+      .wedge:hover path, .wedge:focus-visible path{ filter:brightness(1.1) saturate(1.1); }
+      .wedge text{ pointer-events:none; font-family:"DM Sans", system-ui, sans-serif; }
+      .wedge.is-selected path{ stroke:var(--ink); stroke-width:4; }
+      .wedge:not(.is-selected){ opacity:.94; }
+      .wheel-center{
+        position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+        width:36%; text-align:center; pointer-events:none;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
       }
-      .root-btn small{ display:block; font-size:.62rem; font-weight:500; color:var(--ink-soft); letter-spacing:.04em; }
-      .root-btn[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:#fff; }
-      .root-btn[aria-pressed="true"] small{ color:rgba(255,255,255,.85); }
-      @media (prefers-color-scheme: dark){ .root-btn[aria-pressed="true"]{ color:#1c1917; } .root-btn[aria-pressed="true"] small{ color:rgba(28,25,23,.75); } }
-
-      .quality-groups{ display:grid; gap:12px; }
-      @media (min-width:760px){ .quality-groups{ grid-template-columns:1fr 1fr; } .quality-groups .qgroup:last-child{ grid-column:1 / -1; } }
-      .qgroup-label{ font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 6px; }
-      .chip-row{ display:flex; flex-wrap:wrap; gap:7px; }
-      .chip{
-        border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
-        border-radius:999px; padding:7px 13px; font-size:.92rem; font-weight:600;
+      .wc-name{ font-family:"DM Serif Display", Georgia, serif; font-size:clamp(2.1rem,9vw,3.5rem); line-height:1; margin:0; }
+      .wc-long{ font-size:.88rem; color:var(--ink-soft); line-height:1.25; text-transform:capitalize; }
+      .wc-formula{
+        margin-top:7px; font-size:.74rem; font-weight:700; letter-spacing:.04em;
+        background:var(--accent-soft); color:var(--accent-strong);
+        border:1px solid var(--line); border-radius:999px; padding:4px 10px; white-space:nowrap;
       }
-      .chip .chip-sub{ font-weight:400; color:var(--ink-soft); font-size:.8rem; }
-      .chip[aria-pressed="true"]{ background:var(--ink); border-color:var(--ink); color:var(--bg); }
-      .chip[aria-pressed="true"] .chip-sub{ color:var(--bg); opacity:.75; }
+      @media (prefers-color-scheme: dark){ .wc-formula{ color:var(--accent); } }
+      .wheel-legend{ display:flex; gap:8px 18px; flex-wrap:wrap; justify-content:center; margin-top:12px; font-size:.85rem; color:var(--ink-soft); }
+      .wheel-legend .dot{ display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:-1px; }
+      .dot-outer{ background:conic-gradient(#e4572e,#f2b134,#7fb069,#2a9d8f,#4361ee,#9b5de5,#e4572e); }
+      .dot-inner{ background:linear-gradient(90deg,#fde8d7,#b45309); border:1px solid var(--line); }
+      .wheel-readout{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:12px; }
+      .readout-pill{ font-size:.85rem; font-weight:600; background:var(--panel-2); border:1px solid var(--line); border-radius:999px; padding:6px 12px; }
+      .readout-pill b{ font-weight:700; }
+      @media (max-width:480px){ .wc-long{ font-size:.78rem; } .wc-formula{ font-size:.66rem; padding:3px 8px; } }
 
       /* ---------- Result ---------- */
       .result{
@@ -139,26 +152,35 @@
   </head>
   <body>
     <main>
-      <p class="intro"><strong>Build any chord.</strong> Pick a root note, then a shape — major, minor, 7ths, 9ths, suspended and more. The diagram, notes and fingering update instantly. Standard tuning E&nbsp;A&nbsp;D&nbsp;G&nbsp;B&nbsp;e.</p>
+      <p class="intro"><strong>Build any chord — on one wheel.</strong> Root and shape now live in a single circle, like a colour wheel. Tap a colour on the outer ring for the root, then a shade on the inner ring for the shape. Standard tuning E&nbsp;A&nbsp;D&nbsp;G&nbsp;B&nbsp;e.</p>
 
       <div class="controls">
-        <section class="control-card" aria-labelledby="root-title">
-          <div class="control-head">
-            <h2 class="control-title" id="root-title">1 · Root note (base)</h2>
-            <div class="seg" role="group" aria-label="Accidental style">
-              <button type="button" id="acc-sharp" aria-pressed="true">♯ Sharps</button>
-              <button type="button" id="acc-flat" aria-pressed="false">♭ Flats</button>
+        <section class="control-card wheel-card" aria-labelledby="wheel-title">
+          <div class="control-head wheel-head">
+            <h2 class="control-title" id="wheel-title">Chord wheel · Root + Shape</h2>
+            <div class="wheel-actions">
+              <div class="seg" role="group" aria-label="Accidental style">
+                <button type="button" id="acc-sharp" aria-pressed="true">♯ Sharps</button>
+                <button type="button" id="acc-flat" aria-pressed="false">♭ Flats</button>
+              </div>
+              <button type="button" class="ghost-btn" id="shuffle-btn">🎲 Surprise me</button>
             </div>
           </div>
-          <div class="root-grid" id="root-grid"></div>
-        </section>
-
-        <section class="control-card" aria-labelledby="quality-title">
-          <div class="control-head">
-            <h2 class="control-title" id="quality-title">2 · Shape (quality)</h2>
-            <button type="button" class="ghost-btn" id="shuffle-btn">🎲 Surprise me</button>
+          <p class="wheel-sub">Like picking a colour scheme: the <strong>outer ring is the root</strong> — each note gets its own colour. The <strong>inner ring is the shape</strong> — 22 shades that re-tint to match whichever root you pick.</p>
+          <div class="wheel-wrap">
+            <div id="wheel"></div>
+            <div class="wheel-center" aria-hidden="true">
+              <p class="wc-name" id="wheel-center-name">C</p>
+              <div class="wc-long" id="wheel-center-long">C major</div>
+              <div class="wc-formula" id="wheel-center-formula">1 – 3 – 5</div>
+            </div>
           </div>
-          <div class="quality-groups" id="quality-groups"></div>
+          <div class="wheel-legend" aria-hidden="true">
+            <span><i class="dot dot-outer"></i>Outer ring — Root · 12 notes</span>
+            <span><i class="dot dot-inner"></i>Inner ring — Shape · 22 shades</span>
+            <span>Centre — your chord</span>
+          </div>
+          <div class="wheel-readout" id="wheel-readout" aria-live="polite"></div>
         </section>
       </div>
 
@@ -497,43 +519,90 @@
       return s;
     }
 
-    /* ================= Rendering ================= */
-    var rootGrid = document.getElementById("root-grid");
-    var qualityGroups = document.getElementById("quality-groups");
+    /* ================= Chord wheel (root + shape in one circle) ================= */
+    var SHORT_LABEL = { "":"Maj", "m":"min", "mMaj7":"mMaj7", "m7b5":"m7♭5" };
+    function shortLabel(key){ return SHORT_LABEL.hasOwnProperty(key) ? SHORT_LABEL[key] : key; }
+    function rootHue(pc){ return (28 + pc * 30) % 360; }
+    function polar(cx, cy, r, deg){
+      var rad = deg * Math.PI / 180;
+      return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+    }
+    function wedgePath(cx, cy, rO, rI, a0, a1){
+      var p1 = polar(cx, cy, rO, a0), p2 = polar(cx, cy, rO, a1);
+      var p3 = polar(cx, cy, rI, a1), p4 = polar(cx, cy, rI, a0);
+      var large = (a1 - a0) > 180 ? 1 : 0;
+      return "M" + p1[0].toFixed(1) + " " + p1[1].toFixed(1) +
+        " A" + rO + " " + rO + " 0 " + large + " 1 " + p2[0].toFixed(1) + " " + p2[1].toFixed(1) +
+        " L" + p3[0].toFixed(1) + " " + p3[1].toFixed(1) +
+        " A" + rI + " " + rI + " 0 " + large + " 0 " + p4[0].toFixed(1) + " " + p4[1].toFixed(1) + " Z";
+    }
+    function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+    function wheelSVG(){
+      var S = 560, cx = 280, cy = 280;
+      var hue = rootHue(state.root);
+      var s = '<svg viewBox="0 0 ' + S + ' ' + S + '" role="group" aria-label="Chord wheel: outer ring is the root note, inner ring is the shape">';
+      /* outer ring — 12 roots, one colour each, C at the top, clockwise */
+      for (var pc = 0; pc < 12; pc++){
+        var a0 = -90 + pc * 30, a1 = a0 + 30, mid = a0 + 15;
+        var h = rootHue(pc);
+        var fill = "hsl(" + h + ",58%,54%)";
+        var darkText = h > 38 && h < 172;
+        var tc = darkText ? "#1c1917" : "#ffffff";
+        var sel = pc === state.root;
+        var pos = polar(cx, cy, 234, mid);
+        s += '<g class="wedge' + (sel ? " is-selected" : "") + '" data-kind="root" data-value="' + pc + '" tabindex="0" role="button" aria-pressed="' + sel + '" aria-label="Root ' + esc(noteName(pc)) + '">';
+        s += '<path d="' + wedgePath(cx, cy, 272, 196, a0 + 0.7, a1 - 0.7) + '" fill="' + fill + '"/>';
+        s += '<text x="' + pos[0].toFixed(1) + '" y="' + pos[1].toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="' + (noteName(pc).length > 1 ? 19 : 22) + '" font-weight="700" fill="' + tc + '">' + esc(noteName(pc)) + '</text>';
+        s += '</g>';
+      }
+      /* inner ring — 22 shapes, shades of the selected root colour */
+      var n = QUALITY_ORDER.length;
+      for (var i = 0; i < n; i++){
+        var key = QUALITY_ORDER[i];
+        var step = 360 / n;
+        var b0 = -90 + i * step, b1 = b0 + step, bmid = b0 + step / 2;
+        var L = 86 - (i / (n - 1)) * 38; /* 86% → 48%, light to deep around the wheel */
+        var isSel = key === state.quality;
+        var ifill = isSel ? "hsl(" + hue + ",72%,32%)" : "hsl(" + hue + ",48%," + L.toFixed(0) + "%)";
+        var itc = isSel ? "#ffffff" : (L > 64 ? "#292524" : "#ffffff");
+        var ipos = polar(cx, cy, 150, bmid);
+        var rot = bmid; if (rot > 90 && rot < 270) rot += 180; /* never upside-down */
+        var lab = shortLabel(key);
+        s += '<g class="wedge' + (isSel ? " is-selected" : "") + '" data-kind="quality" data-value="' + esc(key) + '" tabindex="0" role="button" aria-pressed="' + isSel + '" aria-label="Shape ' + esc(QUALITIES[key].label) + '">';
+        s += '<path d="' + wedgePath(cx, cy, 188, 112, b0 + 0.5, b1 - 0.5) + '" fill="' + ifill + '"/>';
+        s += '<text transform="translate(' + ipos[0].toFixed(1) + ' ' + ipos[1].toFixed(1) + ') rotate(' + rot.toFixed(1) + ')" text-anchor="middle" dominant-baseline="central" font-size="' + (lab.length > 4 ? 11.5 : 13) + '" font-weight="' + (isSel ? 700 : 600) + '" fill="' + itc + '">' + esc(lab) + '</text>';
+        s += '</g>';
+      }
+      /* centre hole */
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="104" fill="var(--panel)" stroke="var(--line)" stroke-width="1.5"/>';
+      s += "</svg>";
+      return s;
+    }
 
     function buildControls(){
-      rootGrid.innerHTML = "";
-      for (var pc = 0; pc < 12; pc++){
-        (function(pc){
-          var b = document.createElement("button");
-          b.type = "button"; b.className = "root-btn";
-          b.setAttribute("aria-pressed", pc === state.root ? "true" : "false");
-          b.setAttribute("aria-label", "Root " + noteName(pc));
-          b.innerHTML = noteName(pc);
-          b.addEventListener("click", function(){ state.root = pc; state.voicing = "auto"; render(); });
-          rootGrid.appendChild(b);
-        })(pc);
-      }
-      qualityGroups.innerHTML = "";
-      GROUPS.forEach(function(g){
-        var wrap = document.createElement("div"); wrap.className = "qgroup";
-        var lab = document.createElement("p"); lab.className = "qgroup-label"; lab.textContent = g;
-        var row = document.createElement("div"); row.className = "chip-row";
-        QUALITY_ORDER.forEach(function(key){
-          var q = QUALITIES[key];
-          if (q.group !== g) return;
-          var b = document.createElement("button");
-          b.type = "button"; b.className = "chip";
-          b.setAttribute("aria-pressed", key === state.quality ? "true" : "false");
-          var shown = key === "" ? "Major" : key;
-          b.innerHTML = shown + ' <span class="chip-sub">' + (key === "" ? "" : q.label) + "</span>";
-          if (key === "") b.textContent = "Major";
-          b.addEventListener("click", function(){ state.quality = key; state.voicing = "auto"; render(); });
-          row.appendChild(b);
+      var wheel = document.getElementById("wheel");
+      wheel.innerHTML = wheelSVG();
+      var wedges = wheel.querySelectorAll(".wedge");
+      wedges.forEach(function(g){
+        function pick(){
+          if (g.getAttribute("data-kind") === "root") state.root = parseInt(g.getAttribute("data-value"), 10);
+          else state.quality = g.getAttribute("data-value");
+          state.voicing = "auto"; render();
+        }
+        g.addEventListener("click", pick);
+        g.addEventListener("keydown", function(e){
+          if (e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(); }
         });
-        wrap.appendChild(lab); wrap.appendChild(row);
-        qualityGroups.appendChild(wrap);
       });
+      document.getElementById("wheel-center-name").textContent = chordName();
+      document.getElementById("wheel-center-long").textContent = chordLongName();
+      document.getElementById("wheel-center-formula").textContent = QUALITIES[state.quality].formula;
+      var q = QUALITIES[state.quality];
+      document.getElementById("wheel-readout").innerHTML =
+        '<span class="readout-pill">Root · <b>' + esc(noteName(state.root)) + '</b></span>' +
+        '<span class="readout-pill">Shape · <b>' + esc(q.label) + '</b></span>' +
+        '<span class="readout-pill">' + esc(q.group) + ' · ' + q.intervals.length + ' notes</span>';
       document.getElementById("acc-sharp").setAttribute("aria-pressed", state.accidental === "sharp" ? "true" : "false");
       document.getElementById("acc-flat").setAttribute("aria-pressed", state.accidental === "flat" ? "true" : "false");
     }
